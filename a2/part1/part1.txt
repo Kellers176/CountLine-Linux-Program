@@ -1,0 +1,130 @@
+Part 1:
+find / \( -type f -o -type d \) -perm -02 -ls 
+1) Explain the parameters (command-line arguments) of the above command.
+find is used to search for files in a directory hierarchy
+/ is used to search the home directory
+\( is used to let the program know that there will be a “(“ that it will need to search for. Basically letting it know that there is a argument
+-type f is used to search for files 
+-o  is the OR operator, meaning that it will either find the left hand side of the command-line arguments, or the right hand side.
+-type d is used to search for directories
+-perm -02 is used for world writable permissions. All of the permissions are set for the file.
+-ls is used to list the contents of the directory
+
+
+2) One file returned by this command is /tmp. Describe the reason for having that directory world writable. Is the pure “world-writeable” abstraction appropriate for /tmp? If not, what is a reasonable way of constraining it?
+One reason having /tmp world writeable is because it allows any program to write to it and then when the user shuts off the computer, the file will permanently be lost and no one will be able to gain access to it again.  I do believe that pure “world-writeable” is appropriate for /tmp. This would mean that it is writeable from no matter what source you come from. In class, we talked about how the modern OS uses /tmp as a memory FS. This means that it allocates part of the ram for itself.
+
+3) Action: Locate all suid and sgid programs. Submit this list (list S) as a part of your report by
+constructing an appropriate find command.
+For each of the programs taken from list S ind / -type f \( -perm -4000 -o -perm -2000 \) -exec ls -l {} \;owned by root:root (user and group), describe the
+rationale for making it a suid or a sgid program.
+
+find / -type f \( -perm -4000 -o -perm -2000 \) -exec ls -l {} \;
+-rwsr-xr-x. 1 root root 32008 Apr 11  2018 /usr/bin/fusermount
+
+This program has to do with mounting and unmounting FUSE filesystems. This is used as a simple interface for user programs. This would be included within the SUID/SGID because it provides a secure way for non-priviged users to create and mount their own filesystem implimentations.
+
+-rwsr-xr-x. 1 root root 61328 Apr 11  2018 /usr/bin/ksu
+
+KSU is a kerbalized super-user. This would be included within the SUID/SGID because it allows someone to securely change the real and effective user ID to that of the target user. It also lets the non-priveleged user to create a new security context.
+
+-rwsr-xr-x. 1 root root 27832 Jun 10  2014 /usr/bin/passwd
+
+This program is used to update the users "authentication tokens". This would be included within the SUID/SGID because it allows the user to safely and effectively change their password without messing with anything else in the system. It also encrypts the password afterwards so that no other users can access the password.
+
+-rws--x--x. 1 root root 24048 Apr 11  2018 /usr/bin/chfn
+
+This program is used to change the finger information of the user. This would be included within the SUID/SGID because it allows the user to safely and effectively change their full first name, their work room, their work phone, and their home phone. This would be used so that no unauthorized user could change the information.
+
+-rws--x--x. 1 root root 23960 Apr 11  2018 /usr/bin/chsh
+
+This program is used to change the login shell. This would be included within the SUID/SGID because it allows the user to safely and effectively change their shell that they use without allowing non-authorized users to be able to change it.
+
+-rwsr-xr-x. 1 root root 64240 Nov  5  2016 /usr/bin/chage
+
+This program is used to change the the user passwork expiry information. This would be included within the SUID/SGID because it allows the user to safely and effectively change the number of days between password changes and the date of the last password change. If anyone had access to this, the user may not be able to access their password anymore.
+
+-rwsr-xr-x. 1 root root 78216 Nov  5  2016 /usr/bin/gpasswd
+
+This program is used to administer /etc/group and /etc/gshadow. This would be included within the SUID/SGID because it allows the user to let every group to have administrators, members, and passwords. This would be helpful for only the root user because they do not want other people to be able to create new groups without their security
+
+-rwsr-xr-x. 1 root root 41776 Nov  5  2016 /usr/bin/newgrp
+
+This program is used to log into a new group. This would be included within the SUID/SGID because it allows the user to change the current group ID to the named group as well as many other priveleged accesses. This safely makes sure that the user is verified otherwise, other users would be able to access their information and use it to their advantage.
+
+-rwsr-xr-x. 1 root root 2409344 Apr 11  2018 /usr/bin/Xorg
+
+This program is used as a full featured X server. This would be included within the SUID/SGID because it allows the user to configure and change certain aspects of the X server.
+
+-rwsr-xr-x. 1 root root 44320 Apr 11  2018 /usr/bin/mount
+
+This program is used to mount a filesystem. This would be included within the SUID/SGID because it allows the user to safely and effectively mount different filesystems. This makes sure that all newly mounted filesystems are intentional.
+
+-rwsr-xr-x. 1 root root 32184 Apr 11  2018 /usr/bin/su
+
+This program is used to run a command with substitute user and group ID. This would be included within the SUID/SGID because it allows the user to safely and effectively have temporary access to root and to be able to change certain things.
+
+-rwsr-xr-x. 1 root root 32048 Apr 11  2018 /usr/bin/umount
+
+This program is used to unmount a filesystem. This would be included within the SUID/SGID because it allows the user to safely and effectively unmount different filesystems. This makes sure that all newly unmounted filesystems are intentional.
+
+-rwsr-xr-x. 1 root root 57576 Apr 10  2018 /usr/bin/crontab
+
+This program is used to maintain crontab files for individual users. This would be included within the SUID/SGID because it allows the user to safely and effectively modify system cron jobs.
+
+-rwsr-xr-x. 1 root root 27680 Apr 10  2018 /usr/bin/pkexec
+
+This program is used to execute a command as another user. This would be included within the SUID/SGID because it allows the user to safely and effectively execute PROGRAM as another user. If the username isnt specigied, then the program will be executed as the administrator super user.
+
+-rwsr-xr-x. 1 root root 52952 Apr 10  2018 /usr/bin/at
+
+This program is used to queue, examine, or delete jobs for later execution. This would be included within the SUID/SGID because it allows the user to safely and effectively change the way that the tasks are being processed in the computer.
+
+---s--x--x. 1 root root 143248 Jun 27 14:03 /usr/bin/sudo
+
+This program is used to execute a command as another user. This would be included within the SUID/SGID because it allows the user to safely and effectively execute PROGRAM as another user. If the username isnt specigied, then the program will be executed as the administrator super user.
+
+-rwsr-xr-x. 1 root root 11216 Apr 10  2018 /usr/sbin/pam_timestamp_check
+
+This program is used to check and see if the default timestamp is valid. This would be included within the SUID/SGID because it allows the user to safely and effectively check the timestamp that they otherwise would not have access to
+
+-rwsr-xr-x. 1 root root 36280 Apr 10  2018 /usr/sbin/unix_chkpwd
+
+This program is a helper binary that verifies the password of the current user. This would be included within the SUID/SGID because it makes sure that non-priveleged users dont have access to this but also helps accessed users make sure that they have the correct password
+
+-rws--x--x. 1 root root 40312 Jun  9  2014 /usr/sbin/userhelper
+
+This program is used to provide a basic interface to change a user's password. This would be included within the SUID/SGID because it allows the user to safely and effectively change the password and therefore needs to be secure.
+
+-rwxr-sr-x. 1 root root 11224 Apr 11  2018 /usr/sbin/netreport
+
+This program is used to request notification of network interface changes. This would be included within the SUID/SGID because it allows the user to safely send information to the network management scripts.
+
+-rwsr-xr-x. 1 root root 11288 Apr 11  2018 /usr/sbin/usernetctl
+
+This program is used to allow a user to manipulate a network interface if permited and is the reason why it is included within the SUID/SGID.
+
+-rwsr-xr-x. 1 root root 113408 Apr 12  2018 /usr/sbin/mount.nfs
+
+This program is used to mount a network file system. This would be included within the SUID/SGID because it allows the user to safely and effectively network file system. This makes sure that all newly mounted network file system are intentional.
+
+-rwsr-xr-x. 1 root root 15432 Apr 10  2018 /usr/lib/polkit-1/polkit-agent-helper-1
+
+This program is used to control system-wide priveleges. This would be included within the SUID/SGID because it allows the non-priveleged user to communicate with privileged ones.
+
+-rwsr-xr-x. 1 root root 11136 May 22  2017 /usr/libexec/kde4/kpac_dhcp_helper
+
+This program is used as a desktop environment for Linux based operating systems. This would be included within the SUID/SGID because it allows the non-priveleged user to access the GUI of linux and temporarly allows them access to it
+
+-rwsr-xr-x. 1 root root 49600 Apr 11  2018 /usr/libexec/flatpak-bwrap
+
+This program is used as a sortware deployment, package management, and application virtualization for Linux desktop computers. This would be included within the SUID/SGID because it allows the users to run applications in isolation from the rest of the system.
+
+-rwsr-xr-x. 1 root root 15512 Apr 12  2018 /usr/libexec/spice-gtk-x86_64/spice-client-glib-usb-acl-helper
+
+This program is used to provide a complete open source solution for remote access to virtual machines in a seamless way so you can play videos, record audio, share usb devices and share folders without complications and is also the reason why it is SUID and SGID
+
+-rwsr-xr-x. 1 root root 15440 Apr 12  2018 /usr/libexec/qemu-bridge-helper
+
+This program is a generic and open source machine emulator and virtualizer. This would be included within the SUID/SGID because it executes the guest code directly on the host CPU. 
+
